@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Student Dashboard</title>
+<style>
+body{margin:0;font-family:Arial;background:#f4f6f9}
+.header{
+  background:#0b3c5d;
+  color:#fff;
+  padding:15px;
+  text-align:center;
+}
+.card{
+  background:#fff;
+  margin:20px;
+  padding:20px;
+  border-radius:6px;
+  box-shadow:0 2px 6px rgba(0,0,0,.15);
+}
+button{
+  padding:10px;
+  background:#0b3c5d;
+  color:#fff;
+  border:none;
+  cursor:pointer;
+}
+button:hover{background:#145a86}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+<h2>Student Dashboard</h2>
+</div>
+
+<div class="card">
+<h3>Student Bio-Data</h3>
+<p><b>Matric:</b> <span id="m"></span></p>
+<p><b>Name:</b> <span id="n"></span></p>
+<p><b>Class:</b> <span id="c"></span></p>
+</div>
+
+<div class="card">
+<h3>Check Result</h3>
+
+  
+
+
+<select id="term">
+<option>First Term</option>
+<option>Second Term</option>
+<option>Third Term</option>
+</select>
+
+<select id="session">
+<option>2024/2025</option>
+<option>2025/2026</option>
+</select>
+
+<button onclick="loadResult()">View Result</button>
+</div>
+
+<div class="card" id="resultArea"></div>
+
+<script>
+let matric=localStorage.getItem("studentMatric");
+let students=JSON.parse(localStorage.getItem("students"))||[];
+let s=students.find(x=>x.matric===matric);
+
+if(!s){alert("Student not found");location.href="index.html";}
+
+m.innerText=s.matric;
+n.innerText=s.name;
+c.innerText=s.class;
+
+function loadResult(){
+  let html="<h3>Result Slip</h3><table border='1' width='100%'>";
+  html+="<tr><th>Subject</th><th>Score</th><th>Grade</th></tr>";
+  (s.results||[]).forEach(r=>{
+    html+=`<tr><td>${r.subject}</td><td>${r.score}</td><td>${grade(r.score)}</td></tr>`;
+  });
+  html+="</table><br><button onclick='print()'>Print Result</button>";
+  resultArea.innerHTML=html;
+}
+
+function grade(score){
+  if(score>=70) return "A";
+  if(score>=60) return "B";
+  if(score>=50) return "C";
+  if(score>=45) return "D";
+  return "F";
+}
+</script>
+
+</body>
+</html>

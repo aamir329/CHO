@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>CHO Student Portal</title>
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:linear-gradient(135deg,#0b3c5d,#1abc9c);
+  height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.box{
+  background:#fff;
+  padding:30px;
+  width:360px;
+  border-radius:8px;
+  box-shadow:0 8px 20px rgba(0,0,0,.3);
+}
+h2{text-align:center;color:#0b3c5d}
+input,button{
+  width:100%;
+  padding:12px;
+  margin:10px 0;
+}
+button{
+  background:#0b3c5d;
+  color:#fff;
+  border:none;
+  cursor:pointer;
+}
+button:hover{background:#145a86}
+.footer{
+  text-align:center;
+  font-size:13px;
+  color:#555;
+}
+</style>
+</head>
+
+<body>
+<div class="box">
+<h2>Crescent Heights Oyo</h2>
+<p style="text-align:center">Student Portal</p>
+
+<input id="matric" placeholder="Enter Matric Number">
+<button onclick="login()">Login</button>
+
+<div class="footer">Reaching for the Peak</div>
+</div>
+
+<script>
+function login(){
+  localStorage.setItem("studentMatric", matric.value);
+  location.href="dashboard.html";
+}
+</script>
+</body>
+</html>
