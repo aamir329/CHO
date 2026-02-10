@@ -1,95 +1,328 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Student Dashboard</title>
+<meta charset="UTF-8">
+<title>Crescent Heights Oyo – Teachers Portal</title>
+
 <style>
-body{margin:0;font-family:Arial;background:#f4f6f9}
-.header{
-  background:#0b3c5d;
-  color:#fff;
-  padding:15px;
-  text-align:center;
+body{
+margin:0;
+font-family:"Segoe UI",Arial,sans-serif;
+background:#162539;
+background: url('A_digital_graphic_design_features_the_Crescent_Hei.png') no-repeat center center;
 }
+
+/* HEADER */
+.header{
+background:#0b3c5d;
+color:#fff;
+padding:15px 25px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+/* LAYOUT */
+.wrapper{display:flex}
+
+/* SIDEBAR */
+.sidebar{
+width:240px;
+background:#082c44;
+min-height:100vh;
+color:#fff;
+}
+.sidebar h3{
+text-align:center;
+padding:20px;
+border-bottom:1px solid rgba(255,255,255,.2);
+}
+.sidebar a{
+display:block;
+padding:14px 20px;
+color:#fff;
+text-decoration:none;
+border-bottom:1px solid rgba(255,255,255,.08);
+}
+.sidebar a:hover{background:#0b3c5d}
+
+/* CONTENT */
+.content{flex:1;padding:25px}
+
+/* CARD */
 .card{
-  background:#fff;
-  margin:20px;
-  padding:20px;
-  border-radius:6px;
-  box-shadow:0 2px 6px rgba(0,0,0,.15);
+background:#fff;
+padding:20px;
+margin-bottom:25px;
+border-radius:6px;
+box-shadow:0 2px 6px rgba(0,0,0,.1);
+}
+
+input,select,textarea,button{
+width:100%;
+padding:10px;
+margin:6px 0;
+border:1px solid #ccc;
+border-radius:4px;
 }
 button{
-  padding:10px;
-  background:#0b3c5d;
-  color:#fff;
-  border:none;
-  cursor:pointer;
+background:#0b3c5d;
+color:#fff;
+border:none;
+cursor:pointer;
 }
 button:hover{background:#145a86}
+
+.btn-danger{background:#c0392b}
+.btn-success{background:#27ae60}
+
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:10px;
+}
+th,td{
+border:1px solid #ccc;
+padding:8px;
+text-align:center;
+}
+th{background:#0b3c5d;color:#fff}
+
+.hidden{display:none}
 </style>
 </head>
 
 <body>
 
 <div class="header">
-<h2>Student Dashboard</h2>
+<h2>Crescent Heights Oyo – Teachers Portal</h2>
+<button class="btn-danger" onclick="logout()">Logout</button>
 </div>
 
-<div class="card">
-<h3>Student Bio-Data</h3>
-<p><b>Matric:</b> <span id="m"></span></p>
-<p><b>Name:</b> <span id="n"></span></p>
-<p><b>Class:</b> <span id="c"></span></p>
+<div class="wrapper">
+
+<div class="sidebar">
+<h3>Teacher Menu</h3>
+<a onclick="show('create')">Create Student</a>
+<a onclick="show('manage')">Manage Students</a>
+<a onclick="show('results')">Upload Results</a>
+<a onclick="show('news')">School News</a>
+<a onclick="show('gallery')">School Images</a>
 </div>
 
-<div class="card">
-<h3>Check Result</h3>
+<div class="content">
 
-  
+<!-- CREATE -->
+<div id="create" class="card">
+<h3>Create Student</h3>
+<input id="cName" placeholder="Student Name">
+<input id="cClass" placeholder="Class">
+<button onclick="createStudent()">Create</button>
+<p id="createdMatric"></p>
+</div>
 
+<!-- MANAGE -->
+<div id="manage" class="card hidden">
+<h3>Manage Student</h3>
+<input id="searchMatric" placeholder="Matric Number">
+<button onclick="findStudent()">Search</button>
 
-<select id="term">
+<div id="manageArea" class="hidden">
+<input id="eName">
+<input id="eClass">
+<select id="eTerm">
 <option>First Term</option>
 <option>Second Term</option>
 <option>Third Term</option>
 </select>
+<input id="eSession">
 
-<select id="session">
-<option>2024/2025</option>
-<option>2025/2026</option>
-</select>
-
-<button onclick="loadResult()">View Result</button>
+<button class="btn-success" onclick="saveStudent()">Save</button>
+<button class="btn-success" onclick="promoteStudent()">Promote</button>
+<button class="btn-danger" onclick="deleteStudent()">Delete</button>
 </div>
 
-<div class="card" id="resultArea"></div>
+<h4>All Students</h4>
+<table id="studentTable"></table>
+</div>
 
+<!-- RESULTS -->
+<div id="results" class="card hidden">
+<h3>Upload Results</h3>
+<input id="rMatric" placeholder="Matric Number">
+<input id="subject" placeholder="Subject">
+<input id="score" type="number" min="0" max="100">
+<button onclick="addResult()">Add</button>
+
+<table id="resultTable"></table>
+<button class="btn-success" onclick="printResult()">Print Result Slip</button>
+</div>
 <script>
-let matric=localStorage.getItem("studentMatric");
-let students=JSON.parse(localStorage.getItem("students"))||[];
-let s=students.find(x=>x.matric===matric);
+let news = JSON.parse(localStorage.getItem("schoolNews")) || [];
 
-if(!s){alert("Student not found");location.href="index.html";}
+function postNews(){
+  if(!newsTitle.value || !newsBody.value){
+    alert("Fill all fields");
+    return;
+  }
 
-m.innerText=s.matric;
-n.innerText=s.name;
-c.innerText=s.class;
-
-function loadResult(){
-  let html="<h3>Result Slip</h3><table border='1' width='100%'>";
-  html+="<tr><th>Subject</th><th>Score</th><th>Grade</th></tr>";
-  (s.results||[]).forEach(r=>{
-    html+=`<tr><td>${r.subject}</td><td>${r.score}</td><td>${grade(r.score)}</td></tr>`;
+  news.unshift({
+    title: newsTitle.value,
+    body: newsBody.value,
+    date: new Date().toLocaleDateString()
   });
-  html+="</table><br><button onclick='print()'>Print Result</button>";
-  resultArea.innerHTML=html;
+
+  localStorage.setItem("schoolNews", JSON.stringify(news));
+  newsTitle.value="";
+  newsBody.value="";
+  renderNews();
+  alert("News published");
 }
 
-function grade(score){
-  if(score>=70) return "A";
-  if(score>=60) return "B";
-  if(score>=50) return "C";
-  if(score>=45) return "D";
-  return "F";
+function renderNews(){
+  newsList.innerHTML="";
+  news.forEach(n=>{
+    newsList.innerHTML += `
+      <li>
+        <b>${n.title}</b> <small>(${n.date})</small><br>
+        ${n.body}
+      </li>
+    `;
+  });
+}
+renderNews();
+</script>
+<!-- GALLERY -->
+<div id="gallery" class="card hidden">
+  <h3>School Images</h3>
+
+  <input type="file" accept="image/*" onchange="addImage(event)">
+  <div id="galleryList" style="display:flex;flex-wrap:wrap"></div>
+</div>
+
+<script>
+if(localStorage.getItem("teacherLoggedIn")!=="yes")location.href="login.html";
+
+let students=JSON.parse(localStorage.getItem("students"))||[];
+let currentIndex=null;
+
+/* UTIL */
+function show(id){
+document.querySelectorAll('.card').forEach(c=>c.classList.add('hidden'));
+document.getElementById(id).classList.remove('hidden');
+loadStudents();
+}
+function generateMatric(){
+return "CHO"+Date.now().toString().slice(-6);
+}
+
+/* CREATE */
+function createStudent(){
+let s={
+matric:generateMatric(),
+name:cName.value,
+class:cClass.value,
+term:"First Term",
+session:"2025/2026",
+results:[]
+};
+students.push(s);
+save();
+createdMatric.innerHTML="Matric: <b>"+s.matric+"</b>";
+}
+
+/* LOAD */
+function loadStudents(){
+studentTable.innerHTML="<tr><th>Matric</th><th>Name</th><th>Class</th></tr>";
+students.forEach(s=>{
+studentTable.innerHTML+=`<tr><td>${s.matric}</td><td>${s.name}</td><td>${s.class}</td></tr>`;
+});
+}
+
+/* FIND */
+function findStudent(){
+currentIndex=students.findIndex(s=>s.matric===searchMatric.value);
+if(currentIndex<0)return alert("Not found");
+let s=students[currentIndex];
+eName.value=s.name;
+eClass.value=s.class;
+eTerm.value=s.term;
+eSession.value=s.session;
+manageArea.classList.remove("hidden");
+}
+
+/* SAVE */
+function saveStudent(){
+let s=students[currentIndex];
+s.name=eName.value;
+s.class=eClass.value;
+s.term=eTerm.value;
+s.session=eSession.value;
+save(); alert("Saved");
+}
+
+/* PROMOTE */
+function promoteStudent(){
+let s=students[currentIndex];
+if(s.term==="First Term") s.term="Second Term";
+else if(s.term==="Second Term") s.term="Third Term";
+else{
+s.term="First Term";
+let y=s.session.split("/");
+s.session=(+y[0]+1)+"/"+(+y[1]+1);
+s.class+=" (Promoted)";
+}
+s.results=[];
+save(); alert("Promoted");
+}
+
+/* DELETE */
+function deleteStudent(){
+if(confirm("Delete student?")){
+students.splice(currentIndex,1);
+save(); manageArea.classList.add("hidden");
+}
+}
+
+/* RESULTS */
+function addResult(){
+let s=students.find(st=>st.matric===rMatric.value);
+if(!s)return alert("Student not found");
+s.results.push({subject:subject.value,score:score.value});
+save(); renderResults(s);
+}
+function renderResults(s){
+resultTable.innerHTML="<tr><th>Subject</th><th>Score</th></tr>";
+s.results.forEach(r=>{
+resultTable.innerHTML+=`<tr><td>${r.subject}</td><td>${r.score}</td></tr>`;
+});
+}
+
+/* PRINT */
+function printResult(){
+let s=students.find(st=>st.matric===rMatric.value);
+if(!s)return;
+let w=window.open("","_blank");
+w.document.write(`<h2>Crescent Heights Oyo</h2>
+<p>${s.name} | ${s.class}</p>
+<p>${s.term} - ${s.session}</p>${resultTable.outerHTML}`);
+w.print();
+}
+
+/* NEWS */
+function postNews(){
+newsList.innerHTML+=`<li><b>${newsTitle.value}</b><br>${newsBody.value}</li>`;
+}
+
+/* SAVE */
+function save(){
+localStorage.setItem("students",JSON.stringify(students));
+}
+
+/* LOGOUT */
+function logout(){
+localStorage.removeItem("teacherLoggedIn");
+location.href="login.html";
 }
 </script>
 
